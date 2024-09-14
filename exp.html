@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Slide Slider</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      background-color: #ffffff;
+    }
+    #slider {
+      display: flex;
+      align-items: center;
+      width: 1350px;
+      height: 500px;
+    }
+    #Slide-container {
+      display: flex;
+      align-items: center;
+      overflow: hidden;
+      width: 100%;
+      height: 100%;
+      position: relative;
+      transition: transform 0.5s ease;
+      justify-content: center;
+    }
+    .Slide {
+      min-width: 245.8px;
+      height: 275px;
+      background-color: #f1f1f1;
+      color: white;
+      border-radius: 7px;
+      text-align: center;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5); /* Shadow effect */
+      transition: transform 0.5s ease-in-out; /* Smooth the movement */
+    }
+
+    button {
+      background-color: #007BFF;
+      color: white;
+      border: none;
+      padding: 10px;
+      cursor: pointer;
+      font-size: 16px;
+    }
+
+    .mover {
+      animation: mover 0.62s linear;
+    }
+
+    @keyframes mover {
+      0% {
+        opacity: var(--opac);
+        z-index: var(--zi);
+        transform: var(--scale);
+        margin-left: var(--left);
+      }
+      100% {
+        margin-left: var(--LEFT);
+        opacity: var(--OPAC);
+        z-index: var(--ZI);
+        transform: var(--SCALE);
+      }
+    }
+  </style>
+</head>
+<body>
+  <div id="slider">
+    <button id="prev">←</button>
+    <div id="Slide-container"></div>
+    <button id="next">→</button>
+  </div>
+
+  <script>
+    const SlidesText = ['Bali', 'Bhutan', 'Canada', 'China', 'Indonesia', 'Italy', 'Japan', 'Philpins', 'Singapore', 'Srilanka'];
+    const SlideImg = ['Bali.jpg', 'Bhutan.jpg', 'canada.jpg', 'china.jpeg', 'indonesia.jpg', 'italy.jpg', 'jpn.jpg', 'philp.jpg', 'singapore.jpg', 'Srilanka.jpg'];
+    let FirstIndex = 0; 
+    let LastIndex = SlideImg.length - 1;
+
+    let status;
+
+    function toggleButtons(disable) {
+      document.getElementById('prev').disabled = disable;
+      document.getElementById('next').disabled = disable;
+    }
+
+    function updateSlides(ind) {
+      let slideContainer = document.getElementById('Slide-container');
+      slideContainer.innerHTML = ''; // Clear container
+
+      for (let i = 0; i < 5; i++) {
+        let index = (ind + i) % SlideImg.length;
+        let slide = document.createElement('div');
+        slide.classList.add('Slide');
+        slide.style.backgroundImage = `url('./images/${SlideImg[index]}')`; // Set image as background
+        slide.style.backgroundSize = 'cover'; // Ensure it covers the entire slide
+        slide.style.backgroundPosition = 'center'; // Center the image
+
+        // Add the slide title inside the slide div
+        let slideTitle = document.createElement('h2');
+        slideTitle.textContent = SlidesText[index];
+        slide.appendChild(slideTitle);
+
+          slideContainer.appendChild(slide);
+
+        // Set style based on position
+        const positions = [{ z: 1, o: 0.6, s: 1 }, { z: 2, o: 0.8, s: 1.25 }, { z: 3, o: 1, s: 1.5 }, { z: 2, o: 0.8, s: 1.25 }, { z: 1, o: 0.6, s: 1 }];
+        Object.assign(slide.style, {
+          zIndex: positions[i].z,
+          opacity: positions[i].o,
+          transform: `scale(${positions[i].s})`
+        });
+      }
+
+      // Update indices
+      LastIndex = (ind + 4) % SlideImg.length;
+      FirstIndex = ind;
+    }
+
+    function moveLeft() {
+      status = 'left';
+      // Disable buttons during animation
+      toggleButtons(true);
+
+      let slideContainer = document.getElementById('Slide-container');
+      let slide = document.createElement('div');
+      slide.classList.add('Slide');
+      slide.style.backgroundImage = `url('./images/${SlideImg[(LastIndex + 1) % SlideImg.length]}')`; // Set image as background
+      slide.style.backgroundSize = 'cover'; // Ensure it covers the entire slide
+      slide.style.backgroundPosition = 'center'; // Center the image
+
+      // Add the slide title inside the slide div
+      let slideTitle = document.createElement('h2');
+      slideTitle.textContent = SlidesText[(LastIndex + 1) % SlideImg.length];
+      slide.appendChild(slideTitle);
+
+      slideContainer.appendChild(slide);
+
+      const slideStyles = [
+        { opac: 0.6, OPAC: 0,   zi: 1, ZI: 0, scale: 'scale(1)',    SCALE: 'scale(1)', left: '246px', LEFT: '-270px' },
+        { opac: 0.8, OPAC: 0.6, zi: 2, ZI: 1, scale: 'scale(1.25)', SCALE: 'scale(1)' },
+        { opac: 1,   OPAC: 0.8, zi: 3, ZI: 2, scale: 'scale(1.5)',  SCALE: 'scale(1.25)' },
+        { opac: 0.8, OPAC: 1,   zi: 2, ZI: 3, scale: 'scale(1.25)', SCALE: 'scale(1.5)' },
+        { opac: 0.6, OPAC: 0.8, zi: 1, ZI: 2, scale: 'scale(1)',    SCALE: 'scale(1.25)' },
+        { opac: 0,   OPAC: 0.6, zi: 0, ZI: 1, scale: 'scale(1)',    SCALE: 'scale(1)' }
+      ];
+
+      document.querySelectorAll('.Slide').forEach((slide, index) => {
+        const style = slideStyles[index] || slideStyles[slideStyles.length - 1]; // Default to last style if index is out of bounds
+        Object.entries(style).forEach(([key, value]) => {
+          slide.style.setProperty(`--${key}`, value);
+        });
+        slide.classList.add('mover');
+      });
+
+      setTimeout(() => {
+        updateSlides((FirstIndex + 1) % SlideImg.length);
+        // Re-enable buttons after animation completes
+        toggleButtons(false);
+      }, 600); // Duration should match the animation duration
+    }
+
+    function moveRight() {
+      status = 'right';
+      // Disable buttons during animation
+      toggleButtons(true);
+
+      let slideContainer = document.getElementById('Slide-container');
+      let slide = document.createElement('div');
+      slide.classList.add('Slide');
+      slide.style.backgroundImage = `url('./images/${SlideImg[(FirstIndex - 1 + SlideImg.length) % SlideImg.length]}')`; // Set image as background
+      slide.style.backgroundSize = 'cover'; // Ensure it covers the entire slide
+      slide.style.backgroundPosition = 'center'; // Center the image
+
+      // Add the slide title inside the slide div
+      let slideTitle = document.createElement('h2');
+      slideTitle.textContent = SlidesText[(FirstIndex - 1 + SlideImg.length) % SlideImg.length];
+      slide.appendChild(slideTitle);
+
+      slideContainer.prepend(slide);
+
+      const slideStyles = [
+        { opac: 0,   OPAC: 0.6, zi: 1, ZI: 0, scale: 'scale(1)',    SCALE: 'scale(1)', left: '-245.5px', LEFT: '246px' },
+        { opac: 0.6, OPAC: 0.8, zi: 1, ZI: 2, scale: 'scale(1)',    SCALE: 'scale(1.25)' },
+        { opac: 0.8, OPAC: 1,   zi: 2, ZI: 3, scale: 'scale(1.25)', SCALE: 'scale(1.5)' },
+        { opac: 1,   OPAC: 0.8, zi: 3, ZI: 2, scale: 'scale(1.5)',  SCALE: 'scale(1.25)' },
+        { opac: 0.8, OPAC: 0.6, zi: 2, ZI: 1, scale: 'scale(1.25)', SCALE: 'scale(1)' },
+        { opac: 0.6, OPAC: 0,   zi: 1, ZI: 0, scale: 'scale(1)',    SCALE: 'scale(1)' }
+      ];
+
+      document.querySelectorAll('.Slide').forEach((slide, index) => {
+        const style = slideStyles[index] || slideStyles[slideStyles.length - 1]; // Default to last style if index is out of bounds
+        Object.entries(style).forEach(([key, value]) => {
+          slide.style.setProperty(`--${key}`, value);
+        });
+        slide.classList.add('mover');
+      });
+
+      setTimeout(() => {
+        updateSlides((FirstIndex - 1 + SlideImg.length) % SlideImg.length);
+        // Re-enable buttons after animation completes
+        toggleButtons(false);
+      }, 600); // Duration should match the animation duration
+    }
+
+    document.getElementById('next').addEventListener('click', moveLeft);
+    document.getElementById('prev').addEventListener('click', moveRight);
+
+    // Initial call to populate slides
+    updateSlides(0);
+  </script>
+</body>
+</html>
